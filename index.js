@@ -13,8 +13,17 @@ async function run() {
     try {
         await client.connect();
         const database = client.db("kaathPencil").collection("products");
+        // create a document to insert
+        app.get('/products', async (req, res) => {
+            const query = {};
+            const cursor = database.find(query);
+            const items = await cursor.toArray();
+            res.send(items);
+        });
 
 
+    } finally {
+        //await client.close();
     }
 }
 run().catch(console.dir);
