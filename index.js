@@ -48,6 +48,14 @@ async function run() {
             res.send(inventory);
         });
 
+        // delete
+        app.delete('/product/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const product = await productCollection.deleteOne(query);
+            res.send(product);
+        });
+
         app.get('/user', async (req, res) => {
             const users = await userCollection.find().toArray();
             res.send(users);
@@ -84,31 +92,41 @@ async function run() {
             res.send({ result, token });
         });
 
-        app.get('/purchase', async (req, res) => {
-            const email = req.query.email;
+        // get all purchase
+        app.get('/purchase', verifyJWT, async (req, res) => {
+            const purchases = await purchaseCollection.find().toArray();
+            res.send(purchases.reverse());
+        });
+
+        // get purchase by user-email
+        app.get('/purchase/:email', verifyJWT, async (req, res) => {
+            const email = req.params.email;
             const decodedEmail = req.decoded.email;
             if (email === decodedEmail) {
-                const query = { name: name };
+                const query = { email: email };
                 const purchases = await purchaseCollection.find(query).toArray();
-                return res.send(purchases);
+                return res.send(purchases.reverse());
             }
             else {
-                return res.status(403).send({ message: 'forbidden access' });
+                return res.status(403).send({ message: 'Forbidden access' })
             }
-        })
-
-        app.post('/purchase', async (req, res) => {
-            const purchase = req.body;
-            const query = { name: purchase.name, email: purchase.email }
-            const exists = await purchaseCollection.findOne(query);
-            if (exists) {
-                return res.send({ success: false, purchase: exists })
-            }
-            const result = await purchaseCollection.insertOne(purchase);
-            console.log('sending email');
-            sendConfirmationEmail(purchase);
-            return res.send({ success: true, result });
         });
+
+        // add purchase
+        app.post('/purchase', verifyJWT, async (req, res) => {
+            const purchase = req.body;
+            const result = await purchaseCollection.insertOne(purchase);
+            res.send({ success: true, result });
+        });
+
+        // delete
+        app.delete('/purchase/:id', verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const purchase = await purchaseCollection.deleteOne(query);
+            res.send(purchase);
+        });
+
 
 
     } finally {
