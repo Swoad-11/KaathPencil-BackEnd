@@ -57,7 +57,7 @@ async function run() {
         });
 
         // get all users
-        app.get('/user', verifyJWT, async (req, res) => {
+        app.get('/user', async (req, res) => {
             const users = await userCollection.find().toArray();
             res.send(users.reverse());
         });
@@ -70,7 +70,7 @@ async function run() {
             res.send(user);
         });
 
-        app.get('/admin/:email', verifyJWT, async (req, res) => {
+        app.get('/admin/:email', async (req, res) => {
             const email = req.params.email;
             const user = await userCollection.findOne({ email: email });
             const isAdmin = user.role === 'admin';
@@ -110,13 +110,13 @@ async function run() {
         });
 
         // get all purchase
-        app.get('/purchase', verifyJWT, async (req, res) => {
+        app.get('/purchase', async (req, res) => {
             const purchases = await purchaseCollection.find().toArray();
             res.send(purchases.reverse());
         });
 
         // get purchase by user-email
-        app.get('/purchase/:email', verifyJWT, async (req, res) => {
+        app.get('/purchase/:email', async (req, res) => {
             const email = req.params.email;
             const decodedEmail = req.decoded.email;
             if (email === decodedEmail) {
@@ -130,14 +130,14 @@ async function run() {
         });
 
         // add purchase
-        app.post('/purchase', verifyJWT, async (req, res) => {
+        app.post('/purchase', async (req, res) => {
             const purchase = req.body;
             const result = await purchaseCollection.insertOne(purchase);
             res.send({ success: true, result });
         });
 
         // delete
-        app.delete('/purchase/:id', verifyJWT, async (req, res) => {
+        app.delete('/purchase/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const purchase = await purchaseCollection.deleteOne(query);
