@@ -29,8 +29,8 @@ async function run() {
     try {
         await client.connect();
         const database = client.db("kaathPencil").collection("products");
-        const bookingCollection = client.db('doctors_portal').collection('bookings');
-        const userCollection = client.db('doctors_portal').collection('users');
+        const purchaseCollection = client.db('kaathPencil').collection('purchases');
+        const userCollection = client.db('kaathPencil').collection('users');
 
         // create a document to insert
         app.get('/product', async (req, res) => {
@@ -60,7 +60,7 @@ async function run() {
             res.send({ admin: isAdmin })
         })
 
-        app.put('/user/admin/:email', verifyAdmin, async (req, res) => {
+        app.put('/user/admin/:email', async (req, res) => {
             const email = req.params.email;
             const filter = { email: email };
             const updateDoc = {
@@ -84,29 +84,29 @@ async function run() {
             res.send({ result, token });
         });
 
-        app.get('/booking', verifyJWT, async (req, res) => {
-            const patient = req.query.patient;
+        app.get('/purchase', async (req, res) => {
+            const email = req.query.email;
             const decodedEmail = req.decoded.email;
-            if (patient === decodedEmail) {
-                const query = { patient: patient };
-                const bookings = await bookingCollection.find(query).toArray();
-                return res.send(bookings);
+            if (email === decodedEmail) {
+                const query = { name: name };
+                const purchases = await purchaseCollection.find(query).toArray();
+                return res.send(purchases);
             }
             else {
                 return res.status(403).send({ message: 'forbidden access' });
             }
         })
 
-        app.post('/booking', async (req, res) => {
-            const booking = req.body;
-            const query = { treatment: booking.treatment, date: booking.date, patient: booking.patient }
-            const exists = await bookingCollection.findOne(query);
+        app.post('/purchase', async (req, res) => {
+            const purchase = req.body;
+            const query = { name: purchase.name, email: purchase.email }
+            const exists = await purchaseCollection.findOne(query);
             if (exists) {
-                return res.send({ success: false, booking: exists })
+                return res.send({ success: false, purchase: exists })
             }
-            const result = await bookingCollection.insertOne(booking);
+            const result = await purchaseCollection.insertOne(purchase);
             console.log('sending email');
-            sendAppointmentEmail(booking);
+            sendConfirmationEmail(purchase);
             return res.send({ success: true, result });
         });
 
