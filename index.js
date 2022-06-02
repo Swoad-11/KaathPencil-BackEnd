@@ -144,9 +144,6 @@ async function run() {
             res.send(purchase);
         });
 
-        //cors
-        app.use(cors({ origin: 'https://kaathpencil-d8aa0.web.app/' }));
-
 
 
     } finally {
@@ -158,6 +155,8 @@ run().catch(console.dir);
 
 app.use(cors());
 app.use(express.json());
+//cors
+app.use(cors({ origin: 'https://kaathpencil-d8aa0.web.app/' }));
 
 app.get('/', (req, res) => {
     res.send("running kaathPencil.....");
