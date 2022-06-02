@@ -144,6 +144,9 @@ async function run() {
             res.send(purchase);
         });
 
+        //cors
+        app.use(cors({ origin: 'https://kaathpencil-d8aa0.web.app/' }));
+
 
 
     } finally {
