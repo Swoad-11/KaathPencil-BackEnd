@@ -125,13 +125,13 @@ async function run() {
         });
 
         // get all purchase
-        app.get('/order', async (req, res) => {
+        app.get('/order', verifyJWT, async (req, res) => {
             const orders = await orderCollection.find().toArray();
             res.send(orders.reverse());
         });
 
         // get purchase by user-email
-        app.get('/order/:email', async (req, res) => {
+        app.get('/order/:email', verifyJWT, async (req, res) => {
             const email = req.params.email;
             const decodedEmail = req.decoded.email;
             if (email === decodedEmail) {
@@ -145,14 +145,14 @@ async function run() {
         });
 
         // add purchase
-        app.post('/order', async (req, res) => {
+        app.post('/order', verifyJWT, async (req, res) => {
             const order = req.body;
             const result = await orderCollection.insertOne(order);
             res.send({ success: true, result });
         });
 
         // delete
-        app.delete('/order/:id', async (req, res) => {
+        app.delete('/order/:id', verifyJWT, async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
             const order = await orderCollection.deleteOne(query);
